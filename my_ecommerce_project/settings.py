@@ -32,9 +32,26 @@ SESSION_COOKIE_SECURE = False # COMMENTEZ OU METTEZ À False EN DÉVELOPPEMENT L
 SECRET_KEY = 'django-insecure-s_1np7001n*lsl-4-k!%0q3-n+le@g73(#xk549jy13ay6qo9v'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] 
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost'] # Gardez ces deux pour le développement local
+
+# Ajoutez le domaine de Render si la variable d'environnement est définie
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Si vous avez un domaine personnalisé plus tard, vous pouvez l'ajouter ici
+# Exemple si vous avez un domaine comme 'mon-site-ecommerce.com'
+# PRODUCTION_DOMAIN = os.environ.get('PRODUCTION_DOMAIN')
+# if PRODUCTION_DOMAIN:
+#     ALLOWED_HOSTS.append(PRODUCTION_DOMAIN)
+
+# IMPORTANT : DEBUG DOIT ÊTRE À False EN PRODUCTION
+# N'oubliez pas de gérer DEBUG avec une variable d'environnement aussi
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+
+if DEBUG:
+    ALLOWED_HOSTS.append('*') # Seulement pour le développement local avec DEBUG=True
 
 
 # Application definition
