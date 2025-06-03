@@ -1,0 +1,90 @@
+{% extends 'accounts/base.html' %}
+{% load static %} {# Charge les balises statiques si vous avez des images ou CSS spécifiques ici #}
+
+{% block title %}Mes Commandes{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">Historique de mes Commandes</h1>
+
+    {% if orders %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            {% for order in orders %}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Commande #{{ order.id }}</h5>
+                    <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'processing' %}primary{% elif order.status == 'pending' %}warning{% else %}secondary{% endif %} text-uppercase">{{ order.status }}</span>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-1"><strong>Date de commande :</strong> {{ order.created_at|date:"d M Y H:i" }}</p>
+                    <p class="card-text mb-1"><strong>Montant total :</strong> <span class="fw-bold fs-5">{{ order.total_amount|floatformat:2 }} FCFA</span></p>
+                    <p class="card-text mb-3"><strong>Statut du paiement :</strong> 
+                        {% if order.is_paid %}
+                            <span class="badge bg-success">Payé</span>
+                        {% else %}
+                            <span class="badge bg-danger">Non Payé</span>
+                        {% endif %}
+                    </p>
+                    
+                    <h6 class="mt-4 mb-2">Articles de la commande :</h6>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in order.items.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                {# CORRECTION ICI : Ajout de 'products:' #}
+                                <a href="{% url 'products:product_detail' slug=item.product_variant.product.slug %}" class="text-decoration-none text-dark fw-bold">
+                                    {{ item.product_variant.product.name }}
+                                </a>
+                                <small class="text-muted d-block">
+                                    {% if item.product_variant.size %}Taille: {{ item.product_variant.size }}{% endif %}
+                                    {% if item.product_variant.size and item.product_variant.color %}, {% endif %}
+                                    {% if item.product_variant.color %}Couleur: {{ item.product_variant.color }}{% endif %}
+                                </small>
+                            </div>
+                            <span>{{ item.quantity }} x {{ item.price_at_purchase|floatformat:2 }} FCFA</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="text-end">
+                        <a href="{% url 'orders:order_detail' order_id=order.id %}" class="btn btn-sm btn-outline-primary">Voir les détails de la commande</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            {# Pagination #}
+            {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                        </li>
+                    {% endif %}
+                    <li class="page-item active" aria-current="page">
+                        <span class="page-link">{{ page_obj.number }} / {{ page_obj.num_pages }}</span>
+                    </li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5" role="alert">
+        <h4 class="alert-heading">Vous n'avez pas encore passé de commandes !</h4>
+        <p>Il semble que votre historique de commandes soit vide.</p>
+        <hr>
+        <p class="mb-0">Commencez vos achats dès maintenant pour trouver ce que vous aimez !</p>
+        {# CORRECTION ICI : Ajout de 'products:' #}
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg mt-3"><i class="fas fa-shopping-bag me-2"></i> Commencer mes achats</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

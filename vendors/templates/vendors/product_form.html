@@ -1,0 +1,192 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %} {# Pour styliser les formulaires #}
+
+{% block title %}
+    {% if product %}Modifier le Produit : {{ product.name }}{% else %}Ajouter un Nouveau Produit{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">
+        {% if product %}Modifier le Produit : {{ product.name }}{% else %}Ajouter un Nouveau Produit{% endif %}
+    </h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0 p-4">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data"> {# <--- TRÈS IMPORTANT POUR L'UPLOAD DE FICHIERS #}
+                        {% csrf_token %}
+
+                        {# Formulaire principal du produit #}
+                        <h4 class="mb-3 text-primary">Informations Générales du Produit</h4>
+                        {{ form|crispy }}
+
+                        <hr class="my-4">
+
+                        {# Formset pour les variantes de produits #}
+                        <h4 class="mb-3 text-primary">Variantes du Produit (Tailles, Couleurs, Stock)</h4>
+                        <p class="text-muted small">Ajoutez des variantes si votre produit existe en différentes tailles ou couleurs. Laissez le prix spécifique vide pour utiliser le prix de base du produit.</p>
+                        {{ variants_formset.management_form }}
+                        <div id="variants-form-container">
+                            {% for variant_form in variants_formset %}
+                                <div class="card card-body bg-light mb-3 variant-form-row">
+                                    <div class="d-flex justify-content-end">
+                                        {% if variants_formset.can_delete %}
+                                            <div class="form-check">
+                                                {{ variant_form.DELETE }}
+                                                <label class="form-check-label" for="{{ variant_form.DELETE.id_for_label }}">Supprimer</label>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">{{ variant_form.size|crispy }}</div>
+                                        <div class="col-md-4">{{ variant_form.color|crispy }}</div>
+                                        <div class="col-md-4">{{ variant_form.price_override|crispy }}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">{{ variant_form.stock|crispy }}</div>
+                                        <div class="col-md-6">{{ variant_form.sku|crispy }}</div>
+                                    </div>
+                                    {% if variant_form.errors %}
+                                        <div class="alert alert-danger mt-2">
+                                            {% for field_name, errors in variant_form.errors.items %}
+                                                <p class="mb-0"><strong>{{ field_name|capfirst }}:</strong> {{ errors|join:", " }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" id="add-variant-button" class="btn btn-outline-secondary btn-sm mb-4"><i class="fas fa-plus-circle me-2"></i> Ajouter une Variante</button>
+
+                        <hr class="my-4">
+
+                        {# Formset pour les images de produits #}
+                        <h4 class="mb-3 text-primary">Images du Produit</h4>
+                        <p class="text-muted small">Téléchargez les images de votre produit. La première image sera l'image principale par défaut.</p>
+                        {{ images_formset.management_form }}
+                        <div id="images-form-container">
+                            {% for image_form in images_formset %}
+                                <div class="card card-body bg-light mb-3 image-form-row">
+                                    <div class="d-flex justify-content-end">
+                                        {% if images_formset.can_delete %}
+                                            <div class="form-check">
+                                                {{ image_form.DELETE }}
+                                                <label class="form-check-label" for="{{ image_form.DELETE.id_for_label }}">Supprimer</label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="row align-items-center">
+                                            <div class="col-md-4">
+                                                {% if image_form.instance.image %}
+                                                    <img src="{{ image_form.instance.image.url }}" class="img-thumbnail mb-2" style="max-width: 100px; height: auto;">
+                                                {% endif %}
+                                                {{ image_form.image|crispy }}
+                                            </div>
+                                            <div class="col-md-4">{{ image_form.is_main|crispy }}</div>
+                                            <div class="col-md-4">{{ image_form.order|crispy }}</div>
+                                        </div>
+                                        {% if image_form.errors %}
+                                            <div class="alert alert-danger mt-2">
+                                                {% for field_name, errors in image_form.errors.items %}
+                                                    <p class="mb-0"><strong>{{ field_name|capfirst }}:</strong> {{ errors|join:", " }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" id="add-image-button" class="btn btn-outline-secondary btn-sm mb-4"><i class="fas fa-plus-circle me-2"></i> Ajouter une Image</button>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-save me-2"></i> Enregistrer le Produit</button>
+                                <a href="{% url 'vendors:vendor_dashboard' %}" class="btn btn-outline-secondary btn-lg"><i class="fas fa-arrow-left me-2"></i> Annuler</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block extra_js %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Logique pour ajouter dynamiquement des formulaires de variantes
+            const addVariantButton = document.getElementById('add-variant-button');
+            const variantsFormContainer = document.getElementById('variants-form-container');
+            // Cloner un formulaire existant pour l'utiliser comme modèle
+            const variantEmptyForm = document.querySelector('.variant-form-row').cloneNode(true); 
+            
+            // Nettoyer le formulaire cloné pour qu'il soit vide et sans erreurs
+            variantEmptyForm.querySelectorAll('input').forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+            });
+            variantEmptyForm.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            variantEmptyForm.classList.remove('d-none'); // S'assurer qu'il n'est pas caché
+            variantEmptyForm.querySelector('.form-check input[type="checkbox"]').checked = false; // Décocher la case "Supprimer"
+            variantEmptyForm.querySelectorAll('.alert-danger').forEach(alert => alert.remove()); // Supprimer les messages d'erreur existants
+            variantEmptyForm.querySelectorAll('.is-invalid').forEach(field => field.classList.remove('is-invalid')); // Supprimer les classes d'erreur de Bootstrap
+
+            addVariantButton.addEventListener('click', function() {
+                const totalForms = document.getElementById('id_variants-TOTAL_FORMS');
+                const currentForms = variantsFormContainer.querySelectorAll('.variant-form-row').length;
+                const newForm = variantEmptyForm.cloneNode(true);
+                
+                // Mettre à jour les attributs 'name' et 'id' pour le nouveau formulaire
+                newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, currentForms);
+                
+                variantsFormContainer.appendChild(newForm);
+                totalForms.value = parseInt(totalForms.value) + 1; // Incrémenter le nombre total de formulaires
+            });
+
+            // Logique pour ajouter dynamiquement des formulaires d'images
+            const addImageButton = document.getElementById('add-image-button');
+            const imagesFormContainer = document.getElementById('images-form-container');
+            // Cloner un formulaire existant pour l'utiliser comme modèle
+            const imageEmptyForm = document.querySelector('.image-form-row').cloneNode(true); 
+
+            // Nettoyer le formulaire cloné pour qu'il soit vide et sans erreurs
+            imageEmptyForm.querySelectorAll('input').forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else if (input.type === 'file') {
+                    input.value = ''; // Réinitialiser le champ fichier
+                } else {
+                    input.value = '';
+                }
+            });
+            imageEmptyForm.querySelector('img')?.remove(); // Supprimer l'image prévisualisée (utilise l'opérateur optionnel ?)
+            imageEmptyForm.classList.remove('d-none'); // S'assurer qu'il n'est pas caché
+            imageEmptyForm.querySelector('.form-check input[type="checkbox"]').checked = false; // Décocher la case "Supprimer"
+            imageEmptyForm.querySelectorAll('.alert-danger').forEach(alert => alert.remove()); // Supprimer les messages d'erreur existants
+            imageEmptyForm.querySelectorAll('.is-invalid').forEach(field => field.classList.remove('is-invalid')); // Supprimer les classes d'erreur de Bootstrap
+
+
+            addImageButton.addEventListener('click', function() {
+                const totalForms = document.getElementById('id_images-TOTAL_FORMS');
+                const currentForms = imagesFormContainer.querySelectorAll('.image-form-row').length;
+                const newForm = imageEmptyForm.cloneNode(true);
+                
+                // Mettre à jour les attributs 'name' et 'id' pour le nouveau formulaire
+                newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, currentForms);
+                
+                imagesFormContainer.appendChild(newForm);
+                totalForms.value = parseInt(totalForms.value) + 1; // Incrémenter le nombre total de formulaires
+            });
+
+            // Initialisation des tooltips Bootstrap
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+        });
+    </script>
+    {% endblock %}

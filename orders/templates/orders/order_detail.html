@@ -1,0 +1,131 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Détails de la Commande #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">Détails de la Commande #{{ order.id }}</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Informations sur la Commande</h5>
+                    <span class="badge bg-{% if order.status == 'completed' %}success{% elif order.status == 'processing' %}info{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}secondary{% endif %} text-uppercase fs-6">{{ order.status }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Date de commande :</strong> {{ order.created_at|date:"d M Y H:i" }}</p>
+                            <p class="mb-1"><strong>Montant total :</strong> <span class="fw-bold fs-5 text-primary">{{ order.total_amount|floatformat:2 }}FCFA</span></p>
+                            <p class="mb-1"><strong>Statut du paiement :</strong> 
+                                {% if order.is_paid %}
+                                    <span class="badge bg-success">Payé</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Non Payé</span>
+                                {% endif %}
+                            </p>
+                            {% if order.payment_method %}<p class="mb-1"><strong>Méthode de paiement :</strong> {{ order.payment_method }}</p>{% endif %}
+                            {% if order.transaction_id %}<p class="mb-1"><strong>ID de transaction :</strong> {{ order.transaction_id }}</p>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Utilisateur :</strong> {{ order.user.username }}</p>
+                            <p class="mb-1"><strong>Email :</strong> {{ order.user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-secondary text-white py-3">
+                    <h5 class="mb-0">Articles de la Commande</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="py-3 ps-4">Produit</th>
+                                    <th scope="col" class="py-3">Vendeur</th>
+                                    <th scope="col" class="py-3">Prix Unitaire</th>
+                                    <th scope="col" class="py-3">Quantité</th>
+                                    <th scope="col" class="py-3">Total Article</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.items.all %}
+                                <tr class="align-middle">
+                                    <td class="py-3 ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <a href="{% url 'products:product_detail' slug=item.product_variant.product.slug %}">
+                                                {% if item.product_variant.product.images.first %}
+                                                    <img src="{{ item.product_variant.product.images.first.image.url }}" class="rounded me-3" alt="{{ item.product_variant.product.name }}" style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% else %}
+                                                    <img src="{% static 'img/default-product.png' %}" class="rounded me-3" alt="Image par défaut" style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% endif %}
+                                            </a>
+                                            <div>
+                                                <h6 class="mb-0"><a href="{% url 'products:product_detail' slug=item.product_variant.product.slug %}" class="text-decoration-none text-dark">{{ item.product_variant.product.name }}</a></h6>
+                                                <small class="text-muted">
+                                                    {% if item.product_variant.size %}Taille: {{ item.product_variant.size }}{% endif %}
+                                                    {% if item.product_variant.size and item.product_variant.color %}, {% endif %}
+                                                    {% if item.product_variant.color %}Couleur: {{ item.product_variant.color }}{% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        {% if item.vendor %}
+                                            <a href="{% url 'vendors:vendor_detail' vendor_slug=item.vendor.slug %}" class="text-decoration-none text-dark">{{ item.vendor.user.username }}</a>
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">{{ item.price_at_purchase|floatformat:2 }}FCFA</td>
+                                    <td class="py-3">{{ item.quantity }}</td>
+                                    <td class="py-3 fw-bold">{{ item.get_total|floatformat:2 }}FCFA</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-info text-white py-3">
+                            <h5 class="mb-0">Adresse de Livraison</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1">{{ order.shipping_address_line1 }}</p>
+                            {% if order.shipping_address_line2 %}<p class="mb-1">{{ order.shipping_address_line2 }}</p>{% endif %}
+                            <p class="mb-1">{{ order.shipping_city }}, {{ order.shipping_zip_code }}</p>
+                            <p class="mb-1">{{ order.shipping_country }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-info text-white py-3">
+                            <h5 class="mb-0">Adresse de Facturation</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-1">{{ order.billing_address_line1 }}</p>
+                            {% if order.billing_address_line2 %}<p class="mb-1">{{ order.billing_address_line2 }}</p>{% endif %}
+                            <p class="mb-1">{{ order.billing_city }}, {{ order.billing_zip_code }}</p>
+                            <p class="mb-1">{{ order.billing_country }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <a href="{% url 'orders:user_orders_list' %}" class="btn btn-outline-primary btn-lg"><i class="fas fa-arrow-left me-2"></i> Retour à mes Commandes</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

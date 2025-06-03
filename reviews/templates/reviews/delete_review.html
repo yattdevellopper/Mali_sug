@@ -1,0 +1,47 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %} {# Pour un rendu stylisé si vous utilisez un formulaire de confirmation #}
+
+{% block title %}Supprimer l'avis pour {{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">Boutique</a></li>
+            {% if product.category %}
+                <li class="breadcrumb-item"><a href="{% url 'products:product_list_by_category' product.category.slug %}">{{ product.category.name }}</a></li>
+            {% endif %}
+            <li class="breadcrumb-item"><a href="{% url 'products:product_detail' slug=product.slug %}">{{ product.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Supprimer l'avis</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 p-4">
+                <div class="card-body">
+                    <h1 class="card-title display-5 fw-bold text-center mb-4 text-danger">Confirmer la suppression de l'avis</h1>
+                    <p class="text-muted text-center mb-4">Êtes-vous sûr de vouloir supprimer votre avis pour **"{{ product.name }}"** ?</p>
+                    <p class="text-center text-danger fw-bold">Cette action est irréversible.</p>
+
+                    <div class="alert alert-warning text-center my-4" role="alert">
+                        Votre avis actuel :
+                        <p class="mb-1">Note : {{ review.rating }} étoiles</p>
+                        <p class="mb-0">Commentaire : "{{ review.comment }}"</p>
+                    </div>
+
+                    <form method="post" action="{% url 'reviews:delete_review' product_slug=product.slug %}">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg"><i class="fas fa-trash-alt me-2"></i> Confirmer la suppression</button>
+                            <a href="{% url 'products:product_detail' slug=product.slug %}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

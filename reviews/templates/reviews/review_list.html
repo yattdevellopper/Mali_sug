@@ -1,0 +1,65 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Mes Avis{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">Mes Avis</h1>
+
+    {% if reviews %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% for review in reviews %}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-1">Avis pour : <a href="{% url 'products:product_detail' slug=review.product.slug %}" class="text-decoration-none text-primary">{{ review.product.name }}</a></h5> {# CORRECTION ICI #}
+                    <small class="text-muted">Publié le {{ review.created_at|date:"d M Y" }}</small>
+                    
+                    <div class="rating-stars my-2 fs-5">
+                        {% for i in "12345"|make_list %}
+                            {% if i|add:0 <= review.rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="card-text">{{ review.comment }}</p>
+
+                    {% if review.is_approved %}
+                        <span class="badge bg-success">Approuvé</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">En attente de modération</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            {# Pagination (if you have more than paginate_by reviews) #}
+            {% if is_paginated %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a></li>
+                    {% endif %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ page_obj.number }} / {{ page_obj.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5" role="alert">
+        <h4 class="alert-heading">Vous n'avez pas encore laissé d'avis !</h4>
+        <p>Partagez votre expérience sur les produits que vous avez achetés.</p>
+        <hr>
+        <p class="mb-0">Explorez notre <a href="{% url 'products:product_list' %}" class="alert-link">boutique</a> pour trouver des articles à évaluer.</p> {# CORRECTION ICI #}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

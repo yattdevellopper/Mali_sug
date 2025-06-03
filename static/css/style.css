@@ -1,0 +1,146 @@
+/* static/css/style.css */
+
+body {
+    font-family: 'Inter', sans-serif; /* Utilisez une police moderne si possible, ex: via Google Fonts */
+    background-color: #f8f9fa; /* Couleur de fond légère */
+    color: #343a40;
+}
+
+/* Navbar */
+.navbar {
+    border-bottom: 1px solid rgba(0,0,0,.05);
+}
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: #007bff !important; /* Bleu primaire */
+}
+.navbar .nav-link {
+    font-weight: 500;
+    color: #495057 !important;
+}
+.navbar .nav-link:hover {
+    color: #007bff !important;
+}
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+}
+.btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+/* Messages Flash */
+.messages-container .alert {
+    margin-bottom: 1rem;
+    border-radius: .5rem;
+    animation: fadeOut 0.5s ease-out 5s forwards; /* Fait disparaître après 5 secondes */
+}
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Cards produits (sur home et liste) */
+.product-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15) !important;
+}
+.product-img {
+    border-top-left-radius: .5rem;
+    border-top-right-radius: .5rem;
+}
+.product-card .card-title a {
+    color: #343a40;
+    font-weight: 600;
+}
+.product-card .card-title a:hover {
+    color: #007bff;
+}
+.product-card .card-text.fw-bold {
+    color: #dc3545; /* Rouge pour le prix */
+}
+
+/* Carrousel d'héro */
+.carousel-item img {
+    border-radius: .5rem;
+}
+.carousel-caption {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+.carousel-caption h5 {
+    font-size: 3rem;
+    font-weight: bold;
+}
+.carousel-caption p {
+    font-size: 1.25rem;
+}
+
+/* Filtres et tri */
+.card-header {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}
+.form-select, .form-control {
+    border-radius: .3rem;
+}
+
+/* Détail produit */
+.product-details h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+}
+.product-details .fs-1 {
+    color: #dc3545; /* Prix en rouge */
+}
+.product-details .img-thumbnail {
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease-in-out;
+}
+.product-details .img-thumbnail:hover {
+    transform: scale(1.05);
+    border-color: #007bff;
+}
+
+/* Notation étoiles */
+.rating-stars .fas, .rating-stars .far {
+    color: #ffc107; /* Jaune étoile */
+}
+
+/* Footer */
+footer {
+    background-color: #f0f2f5;
+    border-top: 1px solid #e9ecef;
+}
+footer a {
+    color: #6c757d;
+    text-decoration: none;
+}
+footer a:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/* Hover effect for category cards */
+.card-hover-shadow {
+    transition: all 0.3s ease-in-out;
+}
+.card-hover-shadow:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    transform: translateY(-3px);
+}

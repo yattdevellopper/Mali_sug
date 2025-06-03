@@ -1,0 +1,129 @@
+{% extends 'accounts/base.html' %}
+{% load static %} {# Charge les balises statiques pour les images par défaut #}
+
+{% block title %}Votre Panier{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">Votre Panier d'Achat</h1>
+
+    {% if cart and cart.items.all %}
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">Articles dans votre panier ({{ cart.get_total_items }} article{{ cart.get_total_items|pluralize }})</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col" class="py-3 ps-4">Produit</th>
+                                    <th scope="col" class="py-3">Prix</th>
+                                    <th scope="col" class="py-3">Quantité</th>
+                                    <th scope="col" class="py-3">Total</th>
+                                    <th scope="col" class="py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart.items.all %}
+                                <tr class="align-middle">
+                                    <td class="py-3 ps-4">
+                                        <div class="d-flex align-items-center">
+                                            {# CORRECTION ICI : Ajout de 'products:' #}
+                                            <a href="{% url 'products:product_detail' slug=item.product_variant.product.slug %}">
+                                                {% if item.product_variant.product.images.first %}
+                                                    <img src="{{ item.product_variant.product.images.first.image.url }}" class="rounded me-3" alt="{{ item.product_variant.product.name }}" style="width: 80px; height: 80px; object-fit: cover;">
+                                                {% else %}
+                                                    <img src="{% static 'img/default-product.png' %}" class="rounded me-3" alt="Image par défaut" style="width: 80px; height: 80px; object-fit: cover;">
+                                                {% endif %}
+                                            </a>
+                                            <div>
+                                                {# CORRECTION ICI : Ajout de 'products:' #}
+                                                <h6 class="mb-0"><a href="{% url 'products:product_detail' slug=item.product_variant.product.slug %}" class="text-decoration-none text-dark">{{ item.product_variant.product.name }}</a></h6>
+                                                <small class="text-muted">
+                                                    {% if item.product_variant.size %}Taille: {{ item.product_variant.size }}{% endif %}
+                                                    {% if item.product_variant.size and item.product_variant.color %}, {% endif %}
+                                                    {% if item.product_variant.color %}Couleur: {{ item.product_variant.color }}{% endif %}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 fw-bold">{{ item.price_at_addition|floatformat:2 }} FCFA</td>
+                                    <td class="py-3">
+                                        <form action="{% url 'cart:update_cart' item.id %}" method="post" class="d-flex align-items-center"> {# Ajout de 'cart:' #}
+                                            {% csrf_token %}
+                                            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product_variant.stock }}" class="form-control form-control-sm text-center" style="width: 70px;">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary ms-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Mettre à jour la quantité"><i class="fas fa-sync-alt"></i></button>
+                                        </form>
+                                    </td>
+                                    <td class="py-3 fw-bold">{{ item.get_total|floatformat:2 }} FCFA</td>
+                                    <td class="py-3 text-end pe-4">
+                                        <form action="{% url 'cart:remove_from_cart' item.id %}" method="post"> {# Ajout de 'cart:' #}
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Retirer du panier"><i class="fas fa-trash-alt"></i></button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {# CORRECTION ICI : Ajout de 'products:' #}
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'products:product_list' %}" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-2"></i> Continuer mes achats</a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0">Résumé du Panier</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            Sous-total ({{ cart.get_total_items }} article{{ cart.get_total_items|pluralize }})
+                            <span>{{ cart.get_total_price|floatformat:2 }} FCFA</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            Frais de livraison
+                            <span class="text-success">Gratuit</span> {# Vous pouvez implémenter une logique de frais de livraison ici #}
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 fw-bold fs-5">
+                            Total
+                            <span>{{ cart.get_total_price|floatformat:2 }} FCFA</span>
+                        </li>
+                    </ul>
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'orders:checkout' %}" class="btn btn-success btn-lg">Passer à la caisse <i class="fas fa-arrow-right ms-2"></i></a> {# Ajout de 'orders:' #}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center py-5" role="alert">
+        <h4 class="alert-heading">Votre panier est vide !</h4>
+        <p>Il semble que vous n'ayez pas encore ajouté d'articles à votre panier.</p>
+        <hr>
+        <p class="mb-0">Commencez vos achats dès maintenant pour trouver ce que vous aimez !</p>
+        {# CORRECTION ICI : Ajout de 'products:' #}
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg mt-3"><i class="fas fa-shopping-bag me-2"></i> Commencer mes achats</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialisation des tooltips Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

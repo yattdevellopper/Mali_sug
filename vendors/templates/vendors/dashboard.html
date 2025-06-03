@@ -1,0 +1,161 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Tableau de Bord Vendeur{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">Tableau de Bord Vendeur</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-12 text-center">
+            <p class="lead">Bienvenue sur votre espace vendeur, **{{ request.user.username }}** !</p>
+            <p class="text-muted">Gérez vos produits, suivez vos commandes et consultez vos performances.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        {# Card 1: Total des Ventes #}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Total des Ventes</h5>
+                    <p class="card-text display-6 fw-bold text-success">{{ total_sales|floatformat:2 }} FCFA</p>
+                    <small class="text-muted">Revenus cumulés de vos produits.</small>
+                </div>
+            </div>
+        </div>
+
+        {# Card 2: Nombre de Produits #}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-box-open fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">Nombre de Produits</h5>
+                    <p class="card-text display-6 fw-bold text-primary">{{ product_count }}</p>
+                    <small class="text-muted">Articles actifs dans votre boutique.</small>
+                </div>
+            </div>
+        </div>
+
+        {# Card 3: Commandes en Attente #}
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-hourglass-half fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Commandes en Attente</h5>
+                    <p class="card-text display-6 fw-bold text-warning">{{ pending_orders_count }}</p>
+                    <small class="text-muted">Commandes nécessitant votre attention.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        {# Section: Gestion des Produits #}
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0">Gestion des Produits</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Ajoutez de nouveaux articles, modifiez les existants ou gérez votre inventaire.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'vendors:vendor_product_add' %}" class="btn btn-primary btn-lg"><i class="fas fa-plus-circle me-2"></i> Ajouter un Nouveau Produit</a>
+                        <a href="{% url 'vendors:vendor_product_list' %}" class="btn btn-outline-primary btn-lg"><i class="fas fa-list-alt me-2"></i> Voir tous mes Produits</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Section: Gestion des Commandes et Avis #}
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-secondary text-white py-3">
+                    <h5 class="mb-0">Commandes & Avis</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">Suivez vos commandes, gérez les expéditions et consultez les avis de vos clients.</p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'orders:user_orders_list' %}" class="btn btn-success btn-lg"><i class="fas fa-shopping-bag me-2"></i> Gérer mes Commandes</a>
+                        <a href="{% url 'reviews:user_reviews_list' %}" class="btn btn-outline-success btn-lg"><i class="fas fa-star me-2"></i> Consulter les Avis</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Section: Vos Derniers Produits (Tableau) #}
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-dark text-white py-3">
+            <h5 class="mb-0">Vos Derniers Produits</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if vendor_products %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="py-3 ps-4">Produit</th>
+                            <th scope="col" class="py-3">Prix</th>
+                            <th scope="col" class="py-3">Statut</th>
+                            <th scope="col" class="py-3">Stock Total</th>
+                            <th scope="col" class="py-3 text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in vendor_products %}
+                        <tr class="align-middle">
+                            <td class="py-3 ps-4">
+                                <div class="d-flex align-items-center">
+                                    <a href="{% url 'products:product_detail' slug=product.slug %}">
+                                        {% if product.images.first %}
+                                            <img src="{{ product.images.first.image.url }}" class="rounded me-3" alt="{{ product.name }}" style="width: 60px; height: 60px; object-fit: cover;">
+                                        {% else %}
+                                            <img src="{% static 'img/default-product.png' %}" class="rounded me-3" alt="Image par défaut" style="width: 60px; height: 60px; object-fit: cover;">
+                                        {% endif %}
+                                    </a>
+                                    <div>
+                                        <h6 class="mb-0"><a href="{% url 'products:product_detail' slug=product.slug %}" class="text-decoration-none text-dark">{{ product.name }}</a></h6>
+                                        <small class="text-muted">{{ product.category.name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 fw-bold">{{ product.price|floatformat:2 }} FCFA</td>
+                            <td class="py-3">
+                                <span class="badge bg-{% if product.status == 'active' %}success{% else %}warning{% endif %}">{{ product.status|upper }}</span>
+                            </td>
+                            <td class="py-3">{{ product.get_total_stock }}</td> {# Assurez-vous d'avoir une méthode get_total_stock sur votre modèle Product #}
+                            <td class="py-3 text-end pe-4">
+                                <a href="{% url 'vendors:vendor_product_edit' product_slug=product.slug %}" class="btn btn-sm btn-outline-info me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier le produit"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'vendors:vendor_product_delete' product_slug=product.slug %}" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="Supprimer le produit"><i class="fas fa-trash-alt"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="p-4 text-center text-muted">
+                <p>Vous n'avez pas encore de produits listés. Commencez par en ajouter un !</p>
+                <a href="{% url 'vendors:vendor_product_add' %}" class="btn btn-primary mt-2">Ajouter mon premier produit</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialisation des tooltips Bootstrap
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
+</script>
+{% endblock %}

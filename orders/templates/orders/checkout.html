@@ -1,0 +1,89 @@
+{% extends 'accounts/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %} {# Pour styliser les formulaires #}
+
+{% block title %}Paiement{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <h1 class="display-4 fw-bold text-center mb-5">Finaliser votre Commande</h1>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0">Récapitulatif de la Commande</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for item in cart.items.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0">{{ item.product_variant.product.name }}</h6>
+                                <small class="text-muted">
+                                    {% if item.product_variant.size %}Taille: {{ item.product_variant.size }}{% endif %}
+                                    {% if item.product_variant.size and item.product_variant.color %}, {% endif %}
+                                    {% if item.product_variant.color %}Couleur: {{ item.product_variant.color }}{% endif %}
+                                </small>
+                            </div>
+                            <span>{{ item.quantity }} x {{ item.price_at_addition|floatformat:2 }} FCFA = <span class="fw-bold">{{ item.get_total|floatformat:2 }} FCFA</span></span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="d-flex justify-content-end align-items-center mt-3 pt-3 border-top">
+                        <h4 class="mb-0 me-3">Total à payer :</h4>
+                        <span class="display-6 fw-bold text-primary">{{ cart.get_total_price|floatformat:2 }} FCFA</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0">Informations de Paiement et Livraison</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Veuillez confirmer vos informations de livraison et de paiement.</p>
+                    
+                    {# Ce formulaire est simplifié. En production, vous auriez des champs pour l'adresse, la carte de crédit, etc. #}
+                    <form method="post" action="{% url 'orders:checkout' %}">
+                        {% csrf_token %}
+                        {# Ici, vous pouvez intégrer des champs pour l'adresse de livraison/facturation, #}
+                        {# et les détails de la carte de crédit ou un bouton de passerelle de paiement. #}
+                        {# Pour cet exemple, nous allons juste avoir un bouton de confirmation. #}
+
+                        <h6 class="mb-3">Adresse de livraison (simplifiée pour l'exemple) :</h6>
+                        <div class="mb-3">
+                            <label for="address1" class="form-label">Adresse Ligne 1</label>
+                            <input type="text" class="form-control" id="address1" name="shipping_address_line1" value="123 Rue de l'Exemple" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="city" class="form-label">Ville</label>
+                            <input type="text" class="form-control" id="city" name="shipping_city" value="Ville Test" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="zip" class="form-label">Code Postal</label>
+                            <input type="text" class="form-control" id="zip" name="shipping_zip_code" value="00000" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="country" class="form-label">Pays</label>
+                            <input type="text" class="form-control" id="country" name="shipping_country" value="France" required>
+                        </div>
+
+                        <h6 class="mb-3">Méthode de paiement (simulée) :</h6>
+                        <div class="alert alert-warning" role="alert">
+                            Ceci est une simulation de paiement. En production, vous intégreriez une passerelle de paiement sécurisée (ex: Stripe, PayPal).
+                        </div>
+                        
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-check-circle me-2"></i> Confirmer la Commande et Payer</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i> Retour au Panier</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

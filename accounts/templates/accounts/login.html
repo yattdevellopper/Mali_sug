@@ -1,0 +1,44 @@
+
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %} {# Si vous utilisez django-crispy-forms #}
+
+{% block title %}Connexion{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Connexion à Mali Sugu</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        <ul class="messages list-unstyled">
+                            {% for message in messages %}
+                                <li class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+                                    {{ message }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }} {# Affiche le formulaire avec crispy_forms #}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg mt-3">Se connecter</button>
+                        </div>
+                    </form>
+                    <p class="text-center mt-3">
+                        <a href="{% url 'accounts:password_reset' %}">Mot de passe oublié ?</a>
+                    </p>
+                    <p class="text-center mt-2">
+                        Pas encore de compte ? <a href="{% url 'accounts:register' %}">Inscrivez-vous ici</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

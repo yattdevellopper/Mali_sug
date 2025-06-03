@@ -1,0 +1,24 @@
+{% extends 'base.html' %} {# Or your main base template #}
+
+{% block title %}Mes Commandes{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2>Mes Commandes</h2>
+    {% if orders %}
+        <ul class="list-group">
+            {% for order in orders %}
+                <li class="list-group-item">
+                    Commande #{{ order.id }} - Montant Total: {{ order.total_amount }} CFA - Statut: {{ order.get_status_display }}
+                    <span class="float-right text-muted">{{ order.created_at|date:"d M Y H:i" }}</span>
+                    <br>
+                    <a href="{% url 'orders:order_detail' order.id %}">Voir les détails</a> {# Assuming you'll have an order_detail URL #}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Vous n'avez pas encore passé de commande.</p>
+        <p><a href="{% url 'products:product_list' %}">Commencez vos achats !</a></p>
+    {% endif %}
+</div>
+{% endblock %}
