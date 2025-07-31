@@ -1,0 +1,45 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "Contact" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{% trans "Contactez-Nous" %}</h1>
+    <p>{% trans "Si vous avez des questions ou des préoccupations, n'hésitez pas à nous contacter." %}</p>
+    <form action="{% url 'accounts:contact' %}" method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">{% trans "Nom" %}</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">{% trans "Email" %}</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label for="message" class="form-label">{% trans "Message" %}</label>
+            <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">{% trans "Envoyer" %}</button>
+    </form>
+</div>
+{% endblock %}
+    <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}">Mon Profil</a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:orders' %}">Mes Commandes</a></li>
+                                {% if user.is_staff %}
+                                    <li><a class="dropdown-item" href="{% url 'admin:index' %}">Administration</a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'accounts:logout' %}" method="post" class="dropdown-item">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link text-danger p-0 border-0 bg-transparent" style="text-decoration: none;">Déconnexion</button>
+                                    </form>
+                                </li>

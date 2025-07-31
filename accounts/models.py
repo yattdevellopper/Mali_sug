@@ -23,3 +23,15 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+class ContactMessage(models.Model):
+    """
+    Modèle pour stocker les messages de contact.
+    """
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message de {self.name} ({self.email})"

@@ -152,3 +152,76 @@ def update_cart_view(request, item_id):
             messages.error(request, "Quantité invalide.")
     
     return redirect('cart:cart_detail')
+# Vue pour vider le panier
+def clear_cart_view(request):
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+    else:
+        session_id = request.session.session_key
+        if not session_id:
+            request.session.save()
+            session_id = request.session.session_key
+        cart, created = Cart.objects.get_or_create(session_id=session_id)
+
+    cart.items.all().delete()
+    messages.info(request, "Votre panier a été vidé.")
+    return redirect('cart:cart_detail') 
+# Vue pour obtenir le total du panier via AJAX
+def cart_total_view(request):
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+    else:
+        session_id = request.session.session_key
+        if not session_id:
+            request.session.save()
+            session_id = request.session.session_key
+        cart, created = Cart.objects.get_or_create(session_id=session_id)
+
+    total = cart.get_total_price()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': True, 'cart_total': total})
+    messages.info(request, f"Le total de votre panier est : {total}")
+    return redirect('cart:cart_detail')
+# Vue pour appliquer un code de réduction
+def apply_discount_view(request):
+    if request.method == 'POST':
+        discount_code = request.POST.get('discount_code', '').strip()
+        if not discount_code:
+            messages.error(request, "Veuillez entrer un code de réduction valide.")
+            return redirect('cart:cart_detail')
+
+        if request.user.is_authenticated:
+            cart, created = Cart.objects.get_or_create(user=request.user)
+        else:
+            session_id = request.session.session_key
+            if not session_id:
+                request.session.save()
+                session_id = request.session.session_key
+            cart, created = Cart.objects.get_or_create(session_id=session_id)
+
+        if cart.apply_discount_code(discount_code):
+            messages.success(request, "Code de réduction appliqué avec succès.")
+        else:
+            messages.error(request, "Le code de réduction est invalide ou expiré.")
+        
+        return redirect('cart:cart_detail')
+    else:
+        messages.error(request, "Requête invalide pour appliquer un code de réduction.")
+        return redirect('cart:cart_detail')
+# Vue pour supprimer un code de réduction
+def remove_discount_view(request):
+    if request.user.is_authenticated:
+        cart, created = Cart.objects.get_or_create(user=request.user)
+    else:
+        session_id = request.session.session_key
+        if not session_id:
+            request.session.save()
+            session_id = request.session.session_key
+        cart, created = Cart.objects.get_or_create(session_id=session_id)
+
+    if cart.remove_discount_code():
+        messages.success(request, "Code de réduction supprimé avec succès.")
+    else:
+        messages.error(request, "Aucun code de réduction à supprimer.")
+    
+    return redirect('cart:cart_detail')

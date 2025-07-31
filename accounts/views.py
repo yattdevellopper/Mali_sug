@@ -8,6 +8,24 @@ from .forms import CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy # Pour les redirections dans les vues basées sur les classes si nécessaire
 
+#vues pour les pages contact apropos et autres
+def contact_view(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        message = request.POST.get('message')
+        print(f"Message reçu de {name} ({email}): {message}")  # <-- Ajoutez ceci
+        messages.success(request, "Votre message a bien été envoyé !")
+        return redirect('accounts:contact')
+    return render(request, 'accounts/contact.html')
+
+def about_view(request):
+    """
+    Vue pour la page À Propos.
+    Affiche des informations sur l'entreprise.
+    """
+    return render(request, 'accounts/about.html')
+
 # --- Vues d'Authentification de Base ---
 
 def register_view(request):
@@ -109,3 +127,4 @@ password_reset_confirm_view = auth_views.PasswordResetConfirmView.as_view(
 password_reset_complete_view = auth_views.PasswordResetCompleteView.as_view(
     template_name='accounts/password_reset_complete.html'
 )
+

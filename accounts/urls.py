@@ -7,6 +7,11 @@ from . import views # Importe vos vues personnalisées (register, password_chang
 app_name = 'accounts' # Définit l'espace de noms pour cette application
 
 urlpatterns = [
+
+    # Vue de contact
+    path('contact/', views.contact_view, name='contact'),
+    # Vue À Propos
+    path('about/', views.about_view, name='about'),
     # Vue d'inscription personnalisée
     path('register/', views.register_view, name='register'),
     

@@ -1,0 +1,12 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{% trans "À Propos" %}{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">{% trans "À Propos" %}</h1>
+    <p>{% trans "Bienvenue sur la page À Propos de Mali-Sugu. Nous sommes une plateforme dédiée à la vente de produits artisanaux et locaux." %}</p>
+    <p>{% trans "Notre mission est de promouvoir les artisans et les producteurs locaux en leur offrant une vitrine en ligne." %}</p>
+</div>
+{% endblock %}

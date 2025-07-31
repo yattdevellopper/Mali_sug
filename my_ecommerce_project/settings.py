@@ -48,7 +48,7 @@ if RENDER_EXTERNAL_HOSTNAME:
 
 # IMPORTANT : DEBUG DOIT ÊTRE À False EN PRODUCTION
 # N'oubliez pas de gérer DEBUG avec une variable d'environnement aussi
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
 
 if DEBUG:
     ALLOWED_HOSTS.append('*') # Seulement pour le développement local avec DEBUG=True
@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'orders',
     'vendors',
     'reviews',
+    'import_export',
 ]
 
 # ... (vos autres configurations comme MIDDLEWARE, TEMPLATES, etc.) ...

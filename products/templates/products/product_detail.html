@@ -26,12 +26,12 @@
                         </div>
                         {% empty %}
                         <div class="carousel-item active">
-                            <img src="{% static 'img/default-product.png' %}" class="d-block w-100 rounded" alt="Image par défaut" style="height: 500px; object-fit: contain;">
+                            <img src="{% static 'img/ecom-banner1.jpg' %}" class="d-block w-100 rounded" alt="Image par défaut" style="height: 500px; object-fit: contain;">
                         </div>
                         {% endfor %}
                     </div>
                     {% if product.images.count > 1 %}
-                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <button class="carousel-control-prev" type="button" data-bs-target="productCarousel" data-bs-slide="prev">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="visually-hidden">Précédent</span>
                     </button>
@@ -45,7 +45,7 @@
                     {% for image in product.images.all %}
                         <img src="{{ image.image.url }}" class="img-thumbnail mx-1" alt="{{ product.name }}" style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}">
                     {% empty %}
-                        <img src="{% static 'img/default-product.png' %}" class="img-thumbnail mx-1" alt="Image par défaut" style="width: 80px; height: 80px; object-fit: cover;">
+                        <img src="{% static 'img/ecom-banner1.jpg' %}" class="img-thumbnail mx-1" alt="Image par défaut" style="width: 80px; height: 80px; object-fit: cover;">
                     {% endfor %}
                 </div>
             </div>
@@ -89,7 +89,17 @@
                             <label for="size-select" class="form-label fw-bold">Taille :</label>
                             <select class="form-select" id="size-select" name="size">
                                 <option value="">Choisir une taille</option>
+                                {% for variant in product.variants.all %}
+                                    {% if variant.size %}
+                                        <option value="{{ variant.size }}">{{ variant.size }}</option>
+                                    {% endif %}
+                                {% endfor %}
+
                                 {# Les options seront remplies par JS en fonction des variantes disponibles #}
+                                {% if not product.variants.exists %}
+                                    <option value="" disabled>Aucune taille disponible</option>
+                                {% endif %}
+
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
@@ -97,18 +107,40 @@
                             <select class="form-select" id="color-select" name="color">
                                 <option value="">Choisir une couleur</option>
                                 {# Les options seront remplies par JS en fonction des variantes disponibles #}
+                                {% for variant in product.variants.all %}
+                                    {% if variant.color %}
+                                        <option value="{{ variant.color }}">{{ variant.color }}</option>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if not product.variants.exists %}
+                                    <option value="" disabled>Aucune couleur disponible</option>
+                                {% endif %}
+
                             </select>
                         </div>
                     </div>
 
                     <div class="mb-4">
+
                         <label for="quantity-select" class="form-label fw-bold">Quantité :</label>
+                        <div class="form-text mb-2">Stock disponible : <span id="stock-count">{{ product.stock }}</span></div>
+                        <div class="form-text mb-2">Sélectionnez la quantité souhaitée.
                         <input type="number" id="quantity-select" name="quantity" class="form-control" value="1" min="1" max="1" style="width: 100px;">
                         <small id="stock-info" class="text-muted mt-1"></small>
                     </div>
+
                     
                     <div class="d-grid gap-2">
-                        <button type="submit" id="addToCartButton" class="btn btn-primary btn-lg" disabled><i class="fas fa-cart-plus me-2"></i> Ajouter au panier</button>
+                    {% if product.variants.first %}
+                        <button type="submit" id="addToCartButton" class="btn btn-primary btn-lg">
+                            <i class="fas fa-cart-plus me-2"></i> Ajouter au panier
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn btn-secondary btn-lg" disabled>
+                            <i class="fas fa-times me-2"></i> Indisponible
+                        </button>
+                    {% endif %}
                     </div>
                 </form>
 
